@@ -1,0 +1,71 @@
+# Install the required libraries
+!pip install openai
+import openai
+import getpass
+import ipywidgets as widgets
+from IPython.display import display
+
+# Set up the OpenAI API key
+openai_api_key = getpass.getpass('Enter your OpenAI API key:')
+openai.api_key = openai_api_key
+
+import time
+
+def ask_gpt(question):
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": question}
+            ],
+            max_tokens=150,
+            temperature=0.7,
+        )
+        answer = response['choices'][0]['message']['content'].strip()
+        return answer
+    except openai.error.RateLimitError:
+        print("Rate limit exceeded. Waiting for 10 seconds before retrying...")
+        time.sleep(10)  # Wait for 10 seconds before retrying
+        return ask_gpt(question)
+
+# Function to run the interaction
+def on_button_click(b):
+    question = question_input.value
+    if question.strip():
+        answer = ask_gpt(question)
+        response_output.value = f"Assistant's response: {answer}"
+    else:
+        response_output.value = "Please enter a valid question."
+
+def ask_gpt(question):
+    return "This is a mock response for testing purposes."
+
+
+# Create widgets for input and output
+question_input = widgets.Text(
+    value='',
+    placeholder='Type your question here',
+    description='Question:',
+    disabled=False
+)
+
+response_output = widgets.Textarea(
+    value='',
+    placeholder='The assistant will respond here',
+    description='Response:',
+    disabled=False
+)
+
+submit_button = widgets.Button(
+    description="Submit",
+    disabled=False,
+    button_style='',  # 'success', 'info', 'warning', 'danger' or ''
+    tooltip='Click to submit your question',
+    icon='check'  # (optional)
+)
+
+submit_button.on_click(on_button_click)
+
+# Display the widgets
+display(question_input, submit_button, response_output)

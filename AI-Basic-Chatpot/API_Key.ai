@@ -1,0 +1,6 @@
+import openai
+import getpass
+
+# Prompt for OpenAI API key
+openai_api_key = getpass.getpass('Enter your OpenAI API key:')
+openai.api_key = openai_api_key
